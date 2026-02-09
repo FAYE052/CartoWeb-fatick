@@ -127,6 +127,17 @@ body {
     font-size: 18px;
 }
 
+/* Bouton menu mobile */
+.navbar-toggle {
+    display: none;
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: auto;
+}
+
 /* ===== CONTENEUR PRINCIPAL ===== */
 #map-container {
     position: fixed;
@@ -253,13 +264,13 @@ body {
 }
 
 .left-panel-toggle {
-    left: 20px;
-    bottom: 20px;
+    left: 10px;
+    bottom: 80px; /* Au-dessus de l'échelle */
 }
 
 .right-panel-toggle {
-    right: 20px;
-    bottom: 20px;
+    right: 10px;
+    bottom: 160px; /* Au-dessus du bouton GPS */
 }
 
 /* ===== CONTRÔLES DES COUCHES ===== */
@@ -612,8 +623,35 @@ body {
         z-index: 150;
     }
 
+    .navbar-toggle {
+        display: block;
+    }
+
     .navbar-menu {
         display: none;
+        flex-direction: column;
+        position: absolute;
+        top: 60px;
+        left: 0;
+        width: 100%;
+        background: linear-gradient(135deg, var(--primary-color), #164775);
+        padding: 10px 0;
+        height: auto;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .navbar-menu.active {
+        display: flex;
+    }
+
+    .navbar-menu li {
+        width: 100%;
+        height: 45px;
+    }
+
+    .navbar-menu a {
+        width: 100%;
+        padding: 0 20px;
     }
 
     #minimap {

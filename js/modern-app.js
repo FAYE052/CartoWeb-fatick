@@ -805,6 +805,13 @@ function updateLegend() {
 function togglePanel(position) {
     const panel = document.getElementById(`${position}-panel`);
     panel.classList.toggle('collapsed');
+    // Gestion spécifique mobile (utilise la classe .show définie dans le CSS media query)
+    panel.classList.toggle('show');
+}
+
+window.toggleMobileMenu = function() {
+    const menu = document.querySelector('.navbar-menu');
+    menu.classList.toggle('active');
 }
 
 // ===== PARAMÈTRES D'ÉVÉNEMENTS =====

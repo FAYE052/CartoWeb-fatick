@@ -38,6 +38,10 @@
                 <span>SIG Fatick</span>
             </div>
             
+            <button class="navbar-toggle" onclick="toggleMobileMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
+            
             <ul class="navbar-menu">
                 <li><a href="#" onclick="showModal('home-modal'); return false;"><i class="fas fa-home"></i> Accueil</a></li>
                 <li><a href="#" onclick="showModal('about-modal'); return false;"><i class="fas fa-info-circle"></i> À propos</a></li>
@@ -115,6 +119,14 @@
 
         <!-- Carte principale -->
         <div id="map"></div>
+        
+        <!-- Boutons flottants pour panneaux (Mobile & Desktop quand fermés) -->
+        <button class="panel-toggle left-panel-toggle" onclick="togglePanel('left')" title="Couches">
+            <i class="fas fa-layer-group"></i>
+        </button>
+        <button class="panel-toggle right-panel-toggle" onclick="togglePanel('right')" title="Légende">
+            <i class="fas fa-globe"></i>
+        </button>
         
         <!-- Bouton GPS style Google Maps -->
         <button id="gps-btn" class="gps-button" onclick="locateUser()" title="Ma position">
