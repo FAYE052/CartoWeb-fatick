@@ -609,7 +609,7 @@ body {
         bottom: 30px;
         width: 100%;
         max-height: none;
-        z-index: 150;
+        z-index: 1500;
         margin-left: 0 !important;
     }
 
@@ -621,7 +621,7 @@ body {
         bottom: 30px;
         width: 100%;
         max-height: none;
-        z-index: 150;
+        z-index: 1500;
         margin-right: 0 !important;
     }
 
