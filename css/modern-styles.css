@@ -639,3 +639,48 @@ body {
     font-size: 11px;
     text-shadow: none;
 }
+
+/* ===== BOUTON GPS STYLE GOOGLE MAPS ===== */
+.gps-button {
+    position: absolute;
+    bottom: 100px; /* Au-dessus de l'échelle */
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: white;
+    border: none;
+    border-radius: 50%;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    cursor: pointer;
+    z-index: 800; /* Au-dessus de la carte */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.3s;
+}
+
+.gps-button:hover {
+    background-color: #f0f0f0;
+}
+
+.gps-button i {
+    font-size: 20px;
+    color: #666;
+}
+
+.gps-button.active i {
+    color: #4285F4; /* Bleu Google */
+}
+
+/* Ajustement mobile pour le bouton GPS */
+@media screen and (max-width: 480px) {
+    .gps-button {
+        bottom: 140px; /* Plus haut sur mobile pour éviter les panneaux */
+        right: 10px;
+    }
+    
+    /* Rendre le bouton d'installation visible dans la navbar mobile si nécessaire */
+    #install-container {
+        display: block !important;
+    }
+}

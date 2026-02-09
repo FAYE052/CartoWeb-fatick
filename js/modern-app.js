@@ -9,6 +9,8 @@ let layers = {};
 let basemaps = {};
 let bounds_group = new L.featureGroup([]);
 // NOTE: labels et totalMarkers sont déjà déclarés dans labels.js
+let deferredPrompt; // Pour stocker l'événement d'installation PWA
+let userLocationMarker = null; // Marqueur de position utilisateur
 
 // ===== INITIALISATION PRINCIPALE =====
 document.addEventListener('DOMContentLoaded', function() {
@@ -26,6 +28,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Initialiser les écouteurs d'événements
         setupEventListeners();
+
+        // Initialiser la logique PWA
+        initPWA();
 
         // Forcer redimensionnement après un court délai
         setTimeout(function() {
@@ -941,7 +946,89 @@ function quickSearch() {
     // Implémenter la logique de recherche rapide
 }
 
+// ===== GÉOLOCALISATION STYLE GOOGLE MAPS =====
+window.locateUser = function() {
+    const btn = document.getElementById('gps-btn');
+    
+    if (!navigator.geolocation) {
+        alert("La géolocalisation n'est pas supportée par votre navigateur.");
+        return;
+    }
+
+    btn.classList.add('active'); // Change la couleur de l'icône
+    
+    map.locate({
+        setView: true,
+        maxZoom: 16,
+        enableHighAccuracy: true
+    });
+};
+
+// Écouteurs d'événements Leaflet pour la localisation
+function setupLocationEvents() {
+    map.on('locationfound', function(e) {
+        const radius = e.accuracy / 2;
+
+        if (userLocationMarker) {
+            map.removeLayer(userLocationMarker);
+        }
+
+        // Créer un marqueur style "point bleu"
+        userLocationMarker = L.circleMarker(e.latlng, {
+            radius: 8,
+            fillColor: '#4285F4',
+            color: '#ffffff',
+            weight: 2,
+            opacity: 1,
+            fillOpacity: 1
+        }).addTo(map);
+        
+        // Cercle de précision
+        L.circle(e.latlng, radius, {
+            color: '#4285F4',
+            fillColor: '#4285F4',
+            fillOpacity: 0.15,
+            weight: 1
+        }).addTo(map);
+    });
+
+    map.on('locationerror', function(e) {
+        alert("Impossible de vous localiser : " + e.message);
+        document.getElementById('gps-btn').classList.remove('active');
+    });
+}
+
+// ===== PWA INSTALLATION =====
+function initPWA() {
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        // Afficher le bouton d'installation
+        const installBtn = document.getElementById('install-container');
+        if (installBtn) installBtn.style.display = 'block';
+    });
+}
+
+window.installPWA = function() {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+            console.log('L\'utilisateur a accepté l\'installation A2HS');
+        }
+        deferredPrompt = null;
+        document.getElementById('install-container').style.display = 'none';
+    });
+};
+
 // Rendre les fonctions de togglePanel accessibles globalement
 window.togglePanel = togglePanel;
 window.toggleLayer = toggleLayer;
 window.changeBasemap = changeBasemap;
+
+// Ajouter l'initialisation des événements de localisation à la fin de initializeMap ou setupEventListeners
+const originalSetupEventListeners = setupEventListeners;
+setupEventListeners = function() {
+    originalSetupEventListeners();
+    setupLocationEvents();
+};

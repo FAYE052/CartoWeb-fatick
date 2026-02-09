@@ -6,6 +6,10 @@
     <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#1e5a96">
+    <meta name="description" content="Application SIG mobile pour la région de Fatick">
+    <link rel="manifest" href="manifest.json">
+    <link rel="apple-touch-icon" href="images/icon-192.png">
     
     <!-- Feuilles de style Leaflet -->
     <link rel="stylesheet" href="css/leaflet.css">
@@ -41,6 +45,9 @@
                 <li><a href="#" onclick="queryMenu(event); return false;"><i class="fas fa-search"></i> Requête</a></li>
                 <li><a href="#" onclick="downloadMenu(event); return false;"><i class="fas fa-download"></i> Téléchargement</a></li>
                 <li><a href="#" onclick="toolsMenu(event); return false;"><i class="fas fa-tools"></i> Outils</a></li>
+                <li id="install-container" style="display: none;">
+                    <a href="#" onclick="installPWA(); return false;" style="color: #f39c12; font-weight: bold;"><i class="fas fa-download"></i> Installer</a>
+                </li>
             </ul>
             
             <div class="navbar-tools">
@@ -108,6 +115,11 @@
 
         <!-- Carte principale -->
         <div id="map"></div>
+        
+        <!-- Bouton GPS style Google Maps -->
+        <button id="gps-btn" class="gps-button" onclick="locateUser()" title="Ma position">
+            <i class="fas fa-crosshairs"></i>
+        </button>
 
         <!-- Mini-map -->
         <div id="minimap"></div>
@@ -494,6 +506,19 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).classList.remove('show');
+        }
+
+        // Enregistrement du Service Worker pour PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(registration => {
+                        console.log('Service Worker enregistré avec succès:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('Échec de l\'enregistrement du Service Worker:', error);
+                    });
+            });
         }
     </script>
 </body>
