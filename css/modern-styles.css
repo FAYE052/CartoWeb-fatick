@@ -255,7 +255,7 @@ body {
     font-size: 18px;
     box-shadow: var(--shadow);
     transition: var(--transition);
-    z-index: 90;
+    z-index: 1100;
 }
 
 .panel-toggle:hover {
@@ -610,6 +610,7 @@ body {
         width: 100%;
         max-height: none;
         z-index: 150;
+        margin-left: 0 !important;
     }
 
     .right-panel.show {
@@ -621,6 +622,7 @@ body {
         width: 100%;
         max-height: none;
         z-index: 150;
+        margin-right: 0 !important;
     }
 
     .navbar-toggle {
@@ -656,6 +658,15 @@ body {
 
     #minimap {
         display: none;
+    }
+
+    /* Fix pour les menus déroulants sur mobile */
+    #query-menu, #download-menu, #tools-menu {
+        left: 10px !important;
+        right: 10px !important;
+        width: auto !important;
+        top: 60px !important;
+        max-width: none !important;
     }
 }
 
