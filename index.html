@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="initial-scale=1,user-scalable=no,maximum-scale=1,width=device-width">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    
+    <!-- Feuilles de style Leaflet -->
+    <link rel="stylesheet" href="css/leaflet.css">
+    <link rel="stylesheet" href="css/L.Control.Layers.Tree.css">
+    <link rel="stylesheet" href="css/L.Control.Locate.min.css">
+    <link rel="stylesheet" href="css/leaflet-measure.css">
+    <link rel="stylesheet" href="css/leaflet.photon.css">
+    <link rel="stylesheet" href="css/MarkerCluster.css">
+    <link rel="stylesheet" href="css/MarkerCluster.Default.css">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="css/fontawesome-all.min.css">
+    
+    <!-- CSS moderne -->
+    <link rel="stylesheet" href="css/modern-styles.css">
+    <link rel="stylesheet" href="css/qgis2web.css">
+    
+    <title>Cartographie web des limites administratives de la région de Fatick</title>
+</head>
+<body>
+    <!-- ===== BARRE DE NAVIGATION ===== -->
+    <nav class="navbar">
+        <div class="navbar-container">
+            <div class="navbar-brand">
+                <i class="fas fa-map"></i>
+                <span>SIG Fatick</span>
+            </div>
+            
+            <ul class="navbar-menu">
+                <li><a href="#" onclick="showModal('home-modal'); return false;"><i class="fas fa-home"></i> Accueil</a></li>
+                <li><a href="#" onclick="showModal('about-modal'); return false;"><i class="fas fa-info-circle"></i> À propos</a></li>
+                <li><a href="#" onclick="showModal('catalog-modal'); return false;"><i class="fas fa-database"></i> Catalogue</a></li>
+                <li><a href="#" onclick="queryMenu(event); return false;"><i class="fas fa-search"></i> Requête</a></li>
+                <li><a href="#" onclick="downloadMenu(event); return false;"><i class="fas fa-download"></i> Téléchargement</a></li>
+                <li><a href="#" onclick="toolsMenu(event); return false;"><i class="fas fa-tools"></i> Outils</a></li>
+            </ul>
+            
+            <div class="navbar-tools">
+                <span style="color:var(--text-light); font-size:14px; padding-right:10px;">&nbsp;</span>
+            </div>
+        </div>
+        
+        <!-- Menus déroulants proches du menu Requête -->
+        <!-- Menu déroulant pour Requête -->
+        <div id="query-menu" style="display: none; position: absolute; top: 60px; left: 280px; background: white; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 999;">
+            <button onclick="showModal('spatial-modal');" style="display: block; width: 100%; padding: 10px 20px; text-align: left; border: none; background: none; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                <i class="fas fa-search-location"></i> Requête Spatiale
+            </button>
+            <button onclick="showModal('attribute-modal');" style="display: block; width: 100%; padding: 10px 20px; text-align: left; border: none; background: none; cursor: pointer;">
+                <i class="fas fa-list"></i> Requête Attributaire
+            </button>
+        </div>
+        <!-- Menu déroulant pour téléchargement -->
+        <div id="download-menu" style="display: none; position: absolute; top: 60px; left: 380px; background: white; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 999; max-height: 70vh; overflow-y: auto;">
+            <!-- Rempli par JavaScript -->
+        </div>
+        <!-- Menu déroulant pour outils -->
+        <div id="tools-menu" style="display: none; position: absolute; top: 60px; left: 520px; background: white; border-radius: 4px; box-shadow: 0 2px 10px rgba(0,0,0,0.2); z-index: 999;">
+            <button onclick="zoomIn();" style="display: block; width: 100%; padding: 10px 20px; text-align: left; border: none; background: none; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                <i class="fas fa-search-plus"></i> Zoom avant
+            </button>
+            <button onclick="zoomOut();" style="display: block; width: 100%; padding: 10px 20px; text-align: left; border: none; background: none; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                <i class="fas fa-search-minus"></i> Zoom arrière
+            </button>
+            <button onclick="resetZoom();" style="display: block; width: 100%; padding: 10px 20px; text-align: left; border: none; background: none; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                <i class="fas fa-home"></i> Vue initiale
+            </button>
+            <button onclick="showModal('help-modal');" style="display: block; width: 100%; padding: 10px 20px; text-align: left; border: none; background: none; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                <i class="fas fa-question-circle"></i> Aide
+            </button>
+            <button onclick="printMap();" style="display: block; width: 100%; padding: 10px 20px; text-align: left; border: none; background: none; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                <i class="fas fa-print"></i> Imprimer
+            </button>
+            <button onclick="window.locateControl ? window.locateControl.start() : alert('Localisation indisponible');" style="display: block; width: 100%; padding: 10px 20px; text-align: left; border: none; background: none; cursor: pointer; border-bottom: 1px solid #f0f0f0;">
+                <i class="fas fa-location-arrow"></i> Localiser
+            </button>
+            <button onclick="window.measureControl ? window.measureControl._startMeasure() : alert('Outil de mesure indisponible');" style="display: block; width: 100%; padding: 10px 20px; text-align: left; border: none; background: none; cursor: pointer;">
+                <i class="fas fa-ruler"></i> Mesure
+            </button>
+        </div>
+    </nav>
+
+    <!-- ===== CONTENEUR PRINCIPAL ===== -->
+    <div id="map-container">
+        <!-- Panneau gauche (Couches) -->
+        <div class="side-panel left-panel" id="left-panel">
+            <div class="panel-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-layer-group"></i>
+                    <h3>Couches</h3>
+                </div>
+                <button class="panel-close-btn" onclick="togglePanel('left')" title="Fermer">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+            </div>
+            <div class="panel-content" id="left-panel-content">
+                <!-- Rempli par JavaScript -->
+            </div>
+        </div>
+
+        <!-- Carte principale -->
+        <div id="map"></div>
+
+        <!-- Mini-map -->
+        <div id="minimap"></div>
+
+        <!-- Panneau droit (Basemaps et Légende) -->
+        <div class="side-panel right-panel" id="right-panel">
+            <div class="panel-header">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-globe"></i>
+                    <h3>Fonds de carte</h3>
+                </div>
+                <button class="panel-close-btn" onclick="togglePanel('right')" title="Fermer">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+            <div class="panel-content" id="right-panel-content">
+                <!-- Rempli par JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== BARRE DE COORDONNÉES =====  -->
+    <div class="coordinates-bar">
+        <div class="coordinates-info">
+            <div class="coordinate-item">
+                <span style="font-weight: 600;">Latitude:</span>
+                <span id="coord-lat">0.0000</span>
+            </div>
+            <div class="coordinate-item">
+                <span style="font-weight: 600;">Longitude:</span>
+                <span id="coord-lng">0.0000</span>
+            </div>
+        </div>
+        <div class="scale-info">
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span style="font-weight: 600;">Zoom:</span>
+                <span id="zoom-level">13</span>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <span style="font-weight: 600;">Échelle:</span>
+                <span id="scale-info">100 m/px</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== MODALES ===== -->
+    
+    <!-- Modal Accueil -->
+    <div id="home-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-home"></i> Bienvenue</h2>
+                <button class="modal-close" onclick="closeModal('home-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>Cartographie web des limites administratives de la région de Fatick</h3>
+                <p>Cette application SIG (Système d'Information Géographique) web vous permet d'explorer et d'analyser les données géographiques de la région de Fatick au Sénégal.</p>
+                
+                <h3>Fonctionnalités principales :</h3>
+                <ul>
+                    <li><strong>Visualisation des données :</strong> Visualisez les limites administratives, le réseau routier, les localités et les écoles</li>
+                    <li><strong>Contrôle des couches :</strong> Affichez ou masquez les différentes couches de données</li>
+                    <li><strong>Recherche :</strong> Utilisez la barre de recherche pour localiser des sites spécifiques</li>
+                    <li><strong>Export de données :</strong> Téléchargez les données en format CSV, GeoJSON ou Shapefile</li>
+                    <li><strong>Mesure :</strong> Mesurez les distances et les surfaces sur la carte</li>
+                    <li><strong>Impression :</strong> Imprimez la carte avec les couches affichées</li>
+                </ul>
+                
+                <h3>Structure des données :</h3>
+                <p>La région de Fatick est divisée en trois départements : Fatick, Foundiougne et Gossas.</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('home-modal')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal À propos -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-info-circle"></i> À propos</h2>
+                <button class="modal-close" onclick="closeModal('about-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>Projet de Cartographie SIG - Fatick</h3>
+                <p>Cette application web a été développée dans le cadre d'un projet de cartographie numérique de la région de Fatick.</p>
+                
+                <h3>Données incluses :</h3>
+                <ul>
+                    <li>Limites administratives (région, départements, arrondissements)</li>
+                    <li>Réseau routier (routes principales, pistes, chemins de fer)</li>
+                    <li>Localités rurales</li>
+                    <li>Infrastructure éducative (écoles)</li>
+                </ul>
+                
+                <h3>Technologies utilisées :</h3>
+                <ul>
+                    <li><strong>Leaflet.js :</strong> Bibliothèque de cartographie web open-source</li>
+                    <li><strong>OpenStreetMap :</strong> Fonds de carte libres</li>
+                    <li><strong>QGIS2Web :</strong> Extension QGIS pour la publication web</li>
+                </ul>
+                
+                <h3>Auteur :</h3>
+                <p>Projet de SIG pour la région administrative de Fatick, Sénégal</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('about-modal')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Catalogue de données -->
+    <div id="catalog-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-database"></i> Catalogue de Données</h2>
+                <button class="modal-close" onclick="closeModal('catalog-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>Couches de données disponibles</h3>
+                
+                <h4 style="color: rgba(251,35,35,1.0); margin-top: 15px;">Région</h4>
+                <p>Limite administrative de la région de Fatick</p>
+                <ul>
+                    <li>Propriétés : Code, Région, Superficie</li>
+                </ul>
+                
+                <h4 style="color: rgba(35,35,35,1.0); margin-top: 15px;">Départements</h4>
+                <p>Divisions administratives de la région (FATICK, FOUNDIOUGNE, GOSSAS)</p>
+                <ul>
+                    <li>Propriétés : Code régional, Département, Code département</li>
+                </ul>
+                
+                <h4 style="color: rgba(35,35,35,1.0); margin-top: 15px;">Arrondissements</h4>
+                <p>Subdivisions des départements</p>
+                <ul>
+                    <li>Propriétés : Code arrondissement</li>
+                </ul>
+                
+                <h4 style="color: rgba(83,83,83,1.0); margin-top: 15px;">Routes</h4>
+                <p>Réseau routier et connexions de transport</p>
+                <ul>
+                    <li>Fonction : Routes principales, routes secondaires, pistes, chemins de fer</li>
+                    <li>Propriétés : Longueur, Code, Fonction</li>
+                </ul>
+                
+                <h4 style="color: rgba(141,90,153,1.0); margin-top: 15px;">Localités</h4>
+                <p>Localités et zones peuplées</p>
+                <ul>
+                    <li>Propriétés : Nom, Coordonnées UTM</li>
+                </ul>
+                
+                <h4 style="color: rgba(232,113,141,1.0); margin-top: 15px;">Écoles</h4>
+                <p>Infrastructure éducative</p>
+                <ul>
+                    <li>Propriétés : Type, Nom de l'école</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('catalog-modal')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Requête spatiale -->
+    <div id="spatial-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-search-location"></i> Requête Spatiale</h2>
+                <button class="modal-close" onclick="closeModal('spatial-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Utilisez les outils suivants pour effectuer des requêtes spatiales :</p>
+                
+                <h3>1. Sélection par boîte englobante</h3>
+                <p>Tracez un rectangle sur la carte pour sélectionner les entités qui s'y trouvent.</p>
+                
+                <h3>2. Sélection par zone tampon</h3>
+                <p>Sélectionnez une entité et spécifiez une distance pour créer une zone tampon.</p>
+                
+                <h3>3. Recherche de proximité</h3>
+                <p>Trouvez les entités les plus proches d'un point spécifié.</p>
+                
+                <h3>Utilisez le formulaire ci-dessous :</h3>
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin-top: 10px;">
+                    <label style="display: block; margin-bottom: 10px;">
+                        Type de requête :
+                        <select style="margin-left: 10px; padding: 5px; border-radius: 3px; border: 1px solid #bdc3c7;">
+                            <option>Intersection</option>
+                            <option>Proximité</option>
+                            <option>Contient</option>
+                            <option>Croise</option>
+                        </select>
+                    </label>
+                    <button class="btn btn-primary" style="margin-top: 10px;">Exécuter la requête</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('spatial-modal')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Requête attributaire -->
+    <div id="attribute-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-list"></i> Requête Attributaire</h2>
+                <button class="modal-close" onclick="closeModal('attribute-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <p>Filtrez les données selon leurs attributs :</p>
+                
+                <div style="background-color: #f9f9f9; padding: 15px; border-radius: 4px; margin-top: 10px;">
+                    <label style="display: block; margin-bottom: 10px;">
+                        Couche :
+                        <select style="margin-left: 10px; padding: 5px; border-radius: 3px; border: 1px solid #bdc3c7; width: 200px;">
+                            <option>Département</option>
+                            <option>Arrondissement</option>
+                            <option>Route</option>
+                            <option>Localité</option>
+                            <option>École</option>
+                        </select>
+                    </label>
+                    
+                    <label style="display: block; margin-bottom: 10px;">
+                        Attribut :
+                        <input type="text" placeholder="Nom de l'attribut" style="margin-left: 10px; padding: 5px; border-radius: 3px; border: 1px solid #bdc3c7; width: 200px;">
+                    </label>
+                    
+                    <label style="display: block; margin-bottom: 10px;">
+                        Valeur :
+                        <input type="text" placeholder="Valeur à rechercher" style="margin-left: 10px; padding: 5px; border-radius: 3px; border: 1px solid #bdc3c7; width: 200px;">
+                    </label>
+                    
+                    <button class="btn btn-primary" style="margin-top: 10px;">Filtrer</button>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('attribute-modal')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Aide -->
+    <div id="help-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2><i class="fas fa-question-circle"></i> Aide</h2>
+                <button class="modal-close" onclick="closeModal('help-modal')">×</button>
+            </div>
+            <div class="modal-body">
+                <h3>Guide d'utilisation de l'application</h3>
+                
+                <h4>Navigation sur la carte</h4>
+                <ul>
+                    <li><strong>Zoom avant :</strong> Cliquez sur <strong>+</strong> ou utilisez la molette de la souris</li>
+                    <li><strong>Zoom arrière :</strong> Cliquez sur <strong>-</strong> ou utilisez la molette de la souris</li>
+                    <li><strong>Panoramique :</strong> Glissez la souris sur la carte</li>
+                </ul>
+                
+                <h4>Outils disponibles</h4>
+                <ul>
+                    <li><strong>Mesure :</strong> Utilisez l'outil de mesure pour calculer les distances et surfaces</li>
+                    <li><strong>Localisation :</strong> Cliquez sur l'icône de localisation pour centrer la carte sur votre position (si disponible)</li>
+                    <li><strong>Recherche :</strong> Utilisez la barre de recherche pour trouver des lieux spécifiques</li>
+                    <li><strong>Impression :</strong> Imprimez la carte avec les couches actuelles</li>
+                </ul>
+                
+                <h4>Gestion des couches</h4>
+                <ul>
+                    <li>Utilisez le panneau gauche pour afficher/masquer les couches</li>
+                    <li>Changez le fond de carte depuis le panneau droit</li>
+                    <li>Consultez la légende pour comprendre les symboles cartographiques</li>
+                </ul>
+                
+                <h4>Export de données</h4>
+                <ul>
+                    <li>Cliquez sur <strong>Données</strong> dans la barre de navigation</li>
+                    <li>Sélectionnez le format d'export (CSV, GeoJSON, Shapefile)</li>
+                    <li>Téléchargez les données</li>
+                </ul>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeModal('help-modal')">Fermer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== SCRIPTS ===== -->
+    <!-- Bibliotheques Leaflet -->
+    <script src="js/qgis2web_expressions.js"></script>
+    <script src="js/leaflet.js"></script>
+    <script src="js/L.Control.Layers.Tree.min.js"></script>
+    <script src="js/L.Control.Locate.min.js"></script>
+    <script src="js/leaflet.rotatedMarker.js"></script>
+    <script src="js/leaflet.pattern.js"></script>
+    <script src="js/leaflet-hash.js"></script>
+    <script src="js/Autolinker.min.js"></script>
+    <script src="js/rbush.min.js"></script>
+    <script src="js/labelgun.min.js"></script>
+    <script src="js/labels.js"></script>
+    <script src="js/leaflet.photon.js"></script>
+    <script src="js/leaflet-measure.js"></script>
+    <script src="js/leaflet.markercluster.js"></script>
+    
+    <!-- Données GeoJSON -->
+    <script src="data/Region_3.js"></script>
+    <script src="data/Departement_4.js"></script>
+    <script src="data/Arrondissement_5.js"></script>
+    <script src="data/Route_6.js"></script>
+    <script src="data/Localite_7.js"></script>
+    <script src="data/Ecole_8.js"></script>
+    
+    <!-- Application moderne -->
+    <script src="js/modern-app.js"></script>
+
+    <!-- Script inline pour les modales et menus -->
+    <script>
+        // Fermer les modales en cliquant à l'extérieur
+        window.addEventListener('click', function(e) {
+            if (e.target.classList.contains('modal')) {
+                e.target.classList.remove('show');
+            }
+        });
+
+        // Menu de téléchargement
+        function downloadMenu(event) {
+            event.preventDefault();
+            const menu = document.getElementById('download-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Menu requête
+        function queryMenu(event) {
+            event.preventDefault();
+            const menu = document.getElementById('query-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Menu outils
+        function toolsMenu(event) {
+            event.preventDefault();
+            const menu = document.getElementById('tools-menu');
+            menu.style.display = menu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Fermer les menus en cliquant ailleurs
+        document.addEventListener('click', function(e) {
+            const download = document.getElementById('download-menu');
+            const tools = document.getElementById('tools-menu');
+            const query = document.getElementById('query-menu');
+            if (!e.target.closest('[onclick*="downloadMenu"]') && !e.target.closest('#download-menu')) {
+                if (download) download.style.display = 'none';
+            }
+            if (!e.target.closest('[onclick*="toolsMenu"]') && !e.target.closest('#tools-menu')) {
+                if (tools) tools.style.display = 'none';
+            }
+            if (!e.target.closest('[onclick*="queryMenu"]') && !e.target.closest('#query-menu')) {
+                if (query) query.style.display = 'none';
+            }
+        });
+
+        // Contrôles de zoom
+        function zoomIn() {
+            if (typeof map !== 'undefined') map.zoomIn();
+        }
+
+        function zoomOut() {
+            if (typeof map !== 'undefined') map.zoomOut();
+        }
+
+        function resetZoom() {
+            if (typeof map !== 'undefined' && typeof bounds_group !== 'undefined') {
+                map.fitBounds(bounds_group.getBounds());
+            }
+        }
+
+        // Gestionnaires des modales
+        function showModal(modalId) {
+            document.getElementById(modalId).classList.add('show');
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('show');
+        }
+    </script>
+</body>
+</html>

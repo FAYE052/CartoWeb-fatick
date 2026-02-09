@@ -1,0 +1,641 @@
+/* ===== VARIABLES ET RESET ===== */
+:root {
+    --primary-color: #1e5a96;
+    --secondary-color: #2ecc71;
+    --accent-color: #f39c12;
+    --text-dark: #2c3e50;
+    --text-light: #ecf0f1;
+    --border-color: #bdc3c7;
+    --shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s ease;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f5f5f5;
+    color: var(--text-dark);
+}
+
+/* ===== BARRE DE NAVIGATION ===== */
+.navbar {
+    background: linear-gradient(135deg, var(--primary-color), #164775);
+    padding: 0;
+    box-shadow: var(--shadow);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    height: 60px;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-container {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 0 20px;
+    width: 100%;
+    height: 100%;
+    gap: 30px;
+}
+
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--text-light);
+    font-size: 18px;
+    font-weight: bold;
+    padding: 0 10px;
+}
+
+.navbar-brand i {
+    font-size: 24px;
+}
+
+.navbar-menu {
+    display: flex;
+    gap: 0;
+    align-items: center;
+    list-style: none;
+    margin: 0;
+    height: 100%;
+}
+
+.navbar-menu li {
+    height: 100%;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-menu a, .navbar-menu button {
+    color: var(--text-light);
+    text-decoration: none;
+    padding: 0 15px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.navbar-menu a:hover,
+.navbar-menu button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    color: var(--text-light);
+}
+
+.navbar-tools {
+    display: flex;
+    gap: 0;
+    align-items: center;
+    height: 100%;
+}
+
+.navbar-tools button {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    padding: 0 15px;
+    font-size: 14px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: var(--transition);
+}
+
+.navbar-tools button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.navbar-tools i {
+    font-size: 18px;
+}
+
+/* ===== CONTENEUR PRINCIPAL ===== */
+#map-container {
+    position: fixed;
+    top: 60px;
+    bottom: 30px;
+    left: 0;
+    right: 0;
+    display: flex;
+    flex-direction: row;
+}
+
+#map {
+    flex: 1;
+    width: 100%;
+    height: 100%;
+}
+/* ensure map has minimum size so it's visible when panels present */
+#map {
+    min-width: 200px;
+    min-height: 300px;
+}
+
+/* ===== PANNEAUX LATÉRAUX ===== */
+.side-panel {
+    background: white;
+    box-shadow: var(--shadow);
+    z-index: 100;
+    transition: var(--transition);
+    display: flex;
+    flex-direction: column;
+}
+
+.left-panel {
+    width: 260px;
+    border-right: 1px solid var(--border-color);
+    max-height: calc(100% - 100px);
+    position: relative;
+}
+
+.right-panel {
+    width: 300px;
+    border-left: 1px solid var(--border-color);
+    max-height: 100%;
+    position: relative;
+}
+
+/* État réduit des panneaux */
+.left-panel.collapsed {
+    margin-left: -260px;
+}
+
+.right-panel.collapsed {
+    margin-right: -300px;
+}
+
+/* En-tête des panneaux */
+.panel-header {
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    padding: 12px 15px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 0;
+}
+
+.panel-header h3 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.panel-close-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    cursor: pointer;
+    font-size: 18px;
+    padding: 0;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+}
+
+.panel-close-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+}
+
+/* Contenu des panneaux */
+.panel-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+}
+
+/* Toggle buttons pour panneaux */
+.panel-toggle {
+    position: fixed;
+    background-color: var(--primary-color);
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 45px;
+    height: 45px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: var(--shadow);
+    transition: var(--transition);
+    z-index: 90;
+}
+
+.panel-toggle:hover {
+    background-color: var(--secondary-color);
+    transform: scale(1.1);
+}
+
+.left-panel-toggle {
+    left: 20px;
+    bottom: 20px;
+}
+
+.right-panel-toggle {
+    right: 20px;
+    bottom: 20px;
+}
+
+/* ===== CONTRÔLES DES COUCHES ===== */
+.layers-section {
+    margin-bottom: 15px;
+}
+
+.layers-title {
+    background-color: #f0f0f0;
+    padding: 10px 12px;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: var(--text-dark);
+    border-left: 4px solid var(--primary-color);
+    margin-bottom: 8px;
+}
+
+.layer-item {
+    padding: 8px 10px;
+    border-bottom: 1px solid #f0f0f0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.layer-item:hover {
+    background-color: #f9f9f9;
+}
+
+.layer-item input[type="checkbox"] {
+    cursor: pointer;
+    width: 16px;
+    height: 16px;
+}
+
+.layer-item label {
+    flex: 1;
+    cursor: pointer;
+    margin: 0;
+}
+
+/* ===== BARRE DE COORDONNÉES ===== */
+.coordinates-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: var(--primary-color);
+    color: var(--text-light);
+    padding: 8px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    z-index: 95;
+    height: 30px;
+}
+
+.coordinates-info {
+    display: flex;
+    gap: 30px;
+    align-items: center;
+}
+
+.coordinate-item {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.scale-info {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+}
+
+/* ===== MINI-MAP ===== */
+#minimap {
+    position: absolute;
+    bottom: 10px;
+    right: 320px; /* 300px pour la largeur du panneau + 20px de marge */
+    width: 150px;
+    height: 150px;
+    border: 2px solid var(--primary-color);
+    border-radius: 4px;
+    z-index: 800;
+    background: white;
+    box-shadow: var(--shadow);
+}
+
+/* ===== MODALES ===== */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    align-items: center;
+    justify-content: center;
+}
+
+.modal.show {
+    display: flex;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    max-width: 600px;
+    max-height: 80vh;
+    overflow-y: auto;
+    animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-50px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #f0f0f0;
+    padding-bottom: 15px;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+    font-size: 20px;
+}
+
+.modal-close {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text-dark);
+    transition: var(--transition);
+}
+
+.modal-close:hover {
+    color: var(--primary-color);
+}
+
+.modal-body {
+    margin-bottom: 20px;
+    line-height: 1.6;
+    color: var(--text-dark);
+}
+
+.modal-body h3 {
+    color: var(--primary-color);
+    margin-top: 15px;
+    margin-bottom: 10px;
+}
+
+.modal-body ul {
+    margin-left: 20px;
+    margin-bottom: 15px;
+}
+
+.modal-body li {
+    margin-bottom: 5px;
+}
+
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    border-top: 1px solid #f0f0f0;
+    padding-top: 15px;
+}
+
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: var(--transition);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn-primary {
+    background-color: var(--primary-color);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: #164775;
+}
+
+.btn-secondary {
+    background-color: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background-color: #7f8c8d;
+}
+
+.btn-success {
+    background-color: var(--secondary-color);
+    color: white;
+}
+
+.btn-success:hover {
+    background-color: #27ae60;
+}
+
+/* ===== SEARCH POST SEARCH ===== */
+.leaflet-photon {
+    background-color: white !important;
+    box-shadow: var(--shadow) !important;
+    border-radius: 4px !important;
+}
+
+.leaflet-photon input {
+    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    padding: 8px 12px;
+}
+
+/* ===== TOOLTIP ET POPUP ===== */
+.leaflet-popup-content-wrapper {
+    border-radius: 4px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+}
+
+.leaflet-popup-tip {
+    background-color: white;
+}
+
+/* ===== ÉCHELLE ===== */
+.leaflet-control-scale {
+    background-color: white !important;
+    border: 1px solid var(--border-color) !important;
+}
+
+.leaflet-control-scale-line {
+    border-color: #323232 !important;
+    border-top: 2px solid #323232 !important;
+    color: #323232 !important;
+}
+
+/* ===== Barre d'outils de la carte ===== */
+.map-tool-btn {
+    background-color: #fff;
+    border-bottom: 1px solid #ccc;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    display: block;
+    text-align: center;
+    text-decoration: none;
+    color: black;
+}
+
+.map-tool-btn:hover {
+    background-color: #f4f4f4;
+}
+
+.map-tool-btn i {
+    font-size: 14px;
+    line-height: 26px;
+    color: #333;
+}
+
+.leaflet-touch .map-tool-btn {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+}
+
+/* ===== RESPONSIVE ===== */
+@media screen and (max-width: 768px) {
+    .left-panel {
+        width: 280px;
+    }
+
+    .right-panel {
+        width: 250px;
+    }
+
+    .navbar-menu a,
+    .navbar-menu button {
+        padding: 0 8px;
+        font-size: 12px;
+    }
+
+    .coordinates-bar {
+        flex-direction: column;
+        height: auto;
+        gap: 5px;
+        padding: 5px 10px;
+    }
+
+    .modal-content {
+        margin: 20px;
+        max-width: calc(100% - 40px);
+    }
+}
+
+@media screen and (max-width: 480px) {
+    .left-panel,
+    .right-panel {
+        display: none;
+    }
+
+    .left-panel.show {
+        display: flex;
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 30px;
+        width: 100%;
+        max-height: none;
+        z-index: 150;
+    }
+
+    .right-panel.show {
+        display: flex;
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 30px;
+        width: 100%;
+        max-height: none;
+        z-index: 150;
+    }
+
+    .navbar-menu {
+        display: none;
+    }
+
+    #minimap {
+        display: none;
+    }
+}
+
+/* Masquer les boutons des contrôles par défaut de Leaflet pour éviter qu'ils n'apparaissent sur le panneau des couches */
+.leaflet-control-measure-toggle,
+.leaflet-control-locate {
+    display: none !important;
+}
+
+/* Style pour les étiquettes des localités */
+.leaflet-tooltip-localite {
+    background-color: rgba(255, 255, 255, 0.75);
+    border: none;
+    border-radius: 2px;
+    box-shadow: none;
+    color: #000;
+    font-weight: bold;
+    padding: 1px 4px;
+    font-size: 11px;
+    text-shadow: none;
+}
